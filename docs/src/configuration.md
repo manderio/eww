@@ -82,7 +82,6 @@ Example of xorg configuration:
 ```
 
 /* TODO: add table of xorg options */
->>>>>>> 35c8863 (docs update)
 
 ### Wayland
 Example of wayland configuration:
@@ -110,4 +109,3 @@ Example of wayland configuration:
 
 
 
->>>>>>> 35c8863 (docs update)
