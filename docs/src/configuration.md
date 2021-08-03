@@ -1,124 +1,87 @@
 # Configuration
+Eww has a new configuration format called yuck. Yuck is an S-expression configuration language. Vim users can find a plugin for yuck syntax highlighting [here](https://github.com/elkowar/yuck.vim)
 
-For specific built in widgets `<box>, <text>, <slider>, etc` see [Widget Documentation](widgets.md)
+If you are using an older version of eww, and don't want to upgrade to yuck yet, see the [Lecagy](#Legacy) section for the old documentation, though keep in mind this is no longer maintained and more kept as an archive. 
 
 ## Placing the configuration file
 
 Note: Example configuration files can be found in the `examples` directory of the repository and are showcased in [Examples](examples.md).
 
-The configuration file and the scss file should lay in `$XDG_CONFIG_HOME/eww` (or, if unset, `$HOME/.config/eww`). The XML file should be named `eww.xml` and the scss should be named `eww.scss`
+The configuration file and the scss file should lay in `$XDG_CONFIG_HOME/eww` (or, if unset, `$HOME/.config/eww`). The yuck file should be named `eww.yuck` and the scss should be named `eww.scss`
 So the directory structure should look like this:
 ```
 $HOME
 └──.config
     ──eww
-        ├──eww.xml
+        ├──eww.yuck
         └──eww.scss
 ```
 
-## Config structure
+## Config file
 
-Your config structure should look like this:
-```xml
-<eww>
-    <includes>
-        <!-- Put your <file>'s in here -->
-    </includes>
+Eww is using the following structure:
 
-    <definitions>
-        <!-- Put your <def>'s in here -->
-    </definitions>
+```lisp
+(defwidget foo []
+  (box :class "foo" :orientation "h"
+    bar))
 
-    <variables>
-        <!-- Put your <script-var> and <var>'s in here -->
-    </variables>
+(defvar bar
+  "This is a variable")
 
-    <windows>
-        <!-- Put your window blocks here -->
-    </windows>
-</eww>
-```
-See
-[The `<includes>` block](#the-includes-block),
-[The `<definitons>` block](#the-definitions-block),
-[Variables](#variables) and the
-[The `<windows>` block](#the-windows-block).
-
-## Variables
-
-If you create a `<var>` or a `<script-var>`, you can reference them in your `<box>` by doing `{{var}}`. Where `var` is your variable name.
-
-
-### The `<var>` tag
-Allows you to repeat the same text multiple times through  without retyping it multiple times.
-
-Example: This will define a variable named `banana`, with the default value "I like bananas."
-```xml
-<variables>
-    <var name="banana">I like bananas.</var>
-</variables>
-```
-You can then reference it in your widgets by doing:
-
-```xml
-<box>
-    {{banana}}
-</box>
+(defwindow bar
+  :monitor 0
+  (foo))
 ```
 
-To change the value of the variable, and thus change the UI, you can run `eww update banana "I like apples"`
+Since yuck is a lisp, you can put your thingys wherever you want, however, keep track of your parenthases. 
 
-### The `<script-var>` tag
+For the different thingys that can be included in eww, see the following sections:
+[Widgets](#Widgets)
+[Windows](#Windows)
+[Vars](#Variables)
+[Poll](#Poll)
+[Listen](#Listen)
 
-Allows you to create a script that eww runs.
-Useful for creating volume sliders or anything similar.
+## Widgets
 
-Example:
-```xml
-<variables>
-    <script-var name="date" interval="5s">
-        date +%H:%M
-    </script-var>
-</variables>
+Eww is structured around widgets, they are what defines the space and define what goes where within a [window](#windows).
+
+A widget is written in eww like so:
+
+```lisp
+(defwidget foo []
+  (box
+    :class "foo"
+    :orientation "h"
+    :space-evenly false
+    :halign "end"
+    "this is a widget too!")
+
+; content ommitted for brevity
 ```
 
-and then reference it by doing:
-```xml
-<box>
-    {{date}}
-</box>
+Widgets can contain any other widgets. In the example above, the built in [box](widgets.md/box) is being used. For more examples of built in widgets, see [Widget Documentation](widgets.md)
+
+
+## Windows
+
+Windows define where on the screen the widgets should show up. Windows are configured differently depending on whether you are using xorg or wayland.
+
+### Xorg
+Example of xorg configuration:
+
+```lisp
+(defwindow foo 
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry :x "100px" :y "200px" :width "300px" :height "500px")
+  :reserve (struts :side "top" :distance "200px")
+  :wm-ignore true
+  (foo))
 ```
 
-The `interval="5s"` part says how long time it should take before Eww runs the command again.
-Here are the available times you can set:
-
-| Shortened | Full name   |
-|-----------|-------------|
-| ms        | Miliseconds |
-| s         | Seconds     |
-| m         | Minutes     |
-| h         | Hours       |
-
-
-### Tail
-If you don't want a set interval and instead want it to tail (run the script when it detects a change is present) you can simply remove the `interval="5s"` so it becomes:
-```xml
-<variables>
-    <script-var name="date">
-    date +%H:%M
-    </script-var>
-</variables>
-```
-## The `<includes>` block
-Here you can include other config files so that they are merged together at startup. Currently namespaced variables are not supported so be careful when reusing code.
-
-```xml
-<includes>
-  <file path="./other_config_file.xml"/>
-  <file path="./other_config_file2.xml"/>
-</includes>
-```
-
+<<<<<<< HEAD
 If you define a variable/widget/window, in a config file, when it's defined somewhere else, you can see a warning in the eww logs (`eww logs`)
 
 ## The `<definitions>` block
@@ -215,10 +178,14 @@ The `<windows>` config should look something like this:
     </window>
 </windows>
 ```
+=======
+/* TODO: add table of xorg options */
+>>>>>>> 35c8863 (docs update)
 
-For Wayland users the `<reserve/>` block is replaced by the exclusive field in `<window>`.
-The previous `<window>` block would look like this.
+### Wayland
+Example of wayland configuration:
 
+<<<<<<< HEAD
 ```xml
     <window name="main_window" stacking="fg" focusable="false" screen="1" exclusive="true">
         <geometry anchor="top left" x="300px" y="50%" width="25%" height="20px"/>
@@ -275,3 +242,28 @@ Thus, the following setups are recommendations that will _probably_ work. If the
   - Set `wm-ignore` to `false`.
 - For a centered, full-screen widget setup:
   - Set `wm-ignore` to `true`.
+=======
+```lisp
+(defwindow foo 
+  :monitor 0
+  :exclusive true
+  :focusable false
+  :geometry (geometry :x "100px" :y "200px" :width "300px" :height "500px")
+  (foo))
+```
+
+/* TODO: add table of xorg options */
+
+
+## Vars
+
+
+### Poll
+
+
+### Listen
+
+
+
+
+>>>>>>> 35c8863 (docs update)
