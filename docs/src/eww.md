@@ -56,3 +56,13 @@ and then to run it do
 ./eww open <window_name>
 ```
 `<window_name>` is the name of the window, see [The windows block](configuration.md#windows-block).
+
+
+### Legacy
+
+If you wish to use the old version of eww and the old configuration format using XML,
+you would have to pull and install from the old repository. You do this by:
+
+/* this needs some steps, please add them lol */
+
+
